@@ -68,6 +68,19 @@
         if (result.data.content) {
           content = result.data.content;
           $scope.data = result.data;
+          // pass enterprise SSO authentication
+          if(content.url && content.url.indexOf('{{SSO}}') > 0) {
+            var ssoLocalStorageItem = window.localStorage.getItem("SSO_USER");
+            if (ssoLocalStorageItem) {
+              var ssoUserObj = JSON.parse(ssoLocalStorageItem);
+              if (ssoUserObj.ssoUserToken) {
+                content.url =  content.url.replace('{{SSO}}', decodeURIComponent(ssoUserObj.ssoUserToken));
+              }
+            } else {
+              content.url =  content.url.replace('{{SSO}}', '');
+            }
+          }
+
           $scope.url = $sce.trustAsResourceUrl(content.url);
           buildfire.getContext(function (err, context) {
             $scope.isWebPlateform = (context.device.platform == "web");
